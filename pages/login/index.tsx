@@ -6,10 +6,11 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   ImageBackground,
-  Pressable
+  Pressable,
+  Keyboard
 } from 'react-native'
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../Types";
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { RootStackParamList } from '../../Types'
 import { FormProvider, useForm } from 'react-hook-form'
 import FormInput from '../../components/FormInput'
 import Button from '../../components/Button'
@@ -19,7 +20,7 @@ type FormData = {
   password: string
 }
 
-type LoginScreenProps = NativeStackScreenProps<RootStackParamList, "Login">;
+type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>
 
 export default function Login({ navigation }: LoginScreenProps) {
   const form = useForm<FormData>()
@@ -43,7 +44,11 @@ export default function Login({ navigation }: LoginScreenProps) {
   }
 
   return (
-    <TouchableWithoutFeedback>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss()
+      }}
+    >
       <ImageBackground
         style={styles.container}
         source={require('../../assets/background.png')}
@@ -89,7 +94,10 @@ export default function Login({ navigation }: LoginScreenProps) {
             loading={loading}
           />
 
-          <Pressable onPress={() => navigation.navigate('Register')} style={styles.newAccount}>
+          <Pressable
+            onPress={() => navigation.navigate('Register')}
+            style={styles.newAccount}
+          >
             <Text style={styles.text}>Nova conta</Text>
           </Pressable>
         </View>
@@ -112,7 +120,7 @@ const styles = StyleSheet.create({
   },
   newAccount: {
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: 'black',
     borderRadius: 20
   },
   text: {
