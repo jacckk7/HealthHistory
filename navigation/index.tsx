@@ -10,6 +10,7 @@ import Header from '../components/Header'
 import MedicalRecordList from '../pages/medicalRecord/list'
 import Medicine from '../pages/medicine'
 import MedicalRecordCreate from '../pages/medicalRecord/create'
+import RecordShow from '../pages/medicalRecord/show'
 
 export default function Navigation({ onLayoutRootView }: any) {
   return (
@@ -48,6 +49,13 @@ function RootNavigator() {
               header: props => <Header {...props} />
             }}
             component={MedicalRecordCreate}
+          />
+          <Stack.Screen
+            name="RecordShow"
+            options={{
+              header: props => <Header {...props} />
+            }}
+            component={RecordShow}
           />
           <Stack.Screen
             name="Medicine"

@@ -27,9 +27,12 @@ type MedicalRecordCreateScreenProps = NativeStackScreenProps<
 
 type FormData = {
   nome_arquivo: string
-  titulo: string
   descricao: string
-  arquivo_pdf: string
+  arquivo_pdf: {
+    name: string
+    uri: string
+    type: string
+  }
 }
 
 export default function MedicalRecordCreate({
@@ -48,8 +51,14 @@ export default function MedicalRecordCreate({
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf'
       })
-      form.setValue('nome_arquivo', result.assets[0].name)
-      form.setValue('arquivo_pdf', result.assets[0].uri)
+
+      const file = {
+        name: result.assets[0].name,
+        uri: result.assets[0].uri,
+        type: result.assets[0].mimeType
+      }
+
+      form.setValue('arquivo_pdf', file)
       setSelected(result.assets[0].name)
     } catch (error) {
       console.error('Erro ao escolher o arquivo', error)
@@ -61,13 +70,21 @@ export default function MedicalRecordCreate({
     setLoading(true)
     setError('')
     try {
+      const formData = new FormData()
+      formData.append('nome_arquivo', data.nome_arquivo)
+      formData.append('descricao', data.descricao)
+      formData.append('arquivo_pdf', {
+        name: data.arquivo_pdf.name,
+        uri: data.arquivo_pdf.uri,
+        type: data.arquivo_pdf.type
+      })
+
       const headers = {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
       }
 
-      console.log(token)
-
-      await api.post('/api/documentos/adicionar', data, { headers })
+      await api.post('/api/documentos/adicionar', formData, { headers })
       Alert.alert('Prontuário criado com sucesso', '', [
         { text: 'Ok', onPress: () => navigation.navigate('MedicalRecordList') }
       ])
@@ -79,7 +96,11 @@ export default function MedicalRecordCreate({
   }
 
   return (
-    <TouchableWithoutFeedback>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss()
+      }}
+    >
       <ImageBackground
         style={styles.container}
         source={require('../../../assets/background2.png')}
@@ -90,7 +111,7 @@ export default function MedicalRecordCreate({
             <Button onPress={pickDocument} text="Adicionar arquivo" />
             {selected && <Text style={styles.arquive}>{selected}</Text>}
             <FormInput
-              name="titulo"
+              name="nome_arquivo"
               placeholder="Título"
               rules={{
                 required: {
@@ -110,15 +131,18 @@ export default function MedicalRecordCreate({
               textAlignVertical="top"
               placeholder="Digite uma descrição aqui..."
               value={texto}
-              onChangeText={text => {form.setValue('descricao', text); setTexto(text)}}
+              onChangeText={text => {
+                form.setValue('descricao', text)
+                setTexto(text)
+              }}
             />
           </FormProvider>
 
           <Button
-              text="Criar"
-              onPress={form.handleSubmit(onSubmit)}
-              loading={loading}
-            />
+            text="Criar"
+            onPress={form.handleSubmit(onSubmit)}
+            loading={loading}
+          />
         </View>
       </ImageBackground>
     </TouchableWithoutFeedback>
@@ -141,11 +165,11 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   textinput: {
-    backgroundColor: "#D9D9D9",
+    backgroundColor: '#D9D9D9',
     borderWidth: 1,
-    borderColor: "black",
+    borderColor: 'black',
     borderRadius: 20,
-    padding: 10,
+    padding: 10
   },
   title: {
     marginTop: 20,

@@ -5,20 +5,61 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
   View,
-  Text
+  Text,
+  Pressable,
+  FlatList
 } from 'react-native'
 import Button from '../../../components/Button'
 import { RootStackParamList } from '../../../Types'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import React, { useEffect, useState } from 'react'
+import { api } from '../../../services/api'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../store'
 
 type MedicalRecordListScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'MedicalRecordList'
 >
 
-export default function MedicalRecordList({navigation}: MedicalRecordListScreenProps) {
+type Record = {
+  id: number
+  nome_arquivo: string
+  titulo: string
+  arquivo_pdf: string
+  descricao: string
+}
+
+export default function MedicalRecordList({
+  navigation
+}: MedicalRecordListScreenProps) {
+  const [record, setRecord] = useState<Record[]>()
+  const token = useSelector((store: RootState) => store.auth).access_token
+
+  useEffect(() => {
+    const headers = {
+      Authorization: `Bearer ${token}`
+    }
+
+    api
+      .get('/api/documentos/listar', { headers })
+      .then(resp => setRecord(resp.data))
+
+    console.log(record)
+  }, [])
+
+  const renderItem = ({ item }: { item: Record }) => (
+    <Pressable
+      onPress={() => navigation.navigate('RecordShow', { id: item.id })}
+    >
+      <View style={styles.card} key={item.id}>
+        <Text style={styles.text}>{item.titulo}</Text>
+      </View>
+    </Pressable>
+  )
+
   return (
-    <ScrollView>
+    
       <TouchableWithoutFeedback>
         <ImageBackground
           style={styles.container}
@@ -26,11 +67,20 @@ export default function MedicalRecordList({navigation}: MedicalRecordListScreenP
         >
           <Text style={styles.title}>Lista de Prontuários</Text>
           <View style={styles.inputContainer}>
-          <Button onPress={() => navigation.navigate('MedicalRecordCreate')} text='Adicionar prontuário'/>
+            <Button
+              onPress={() => navigation.navigate('MedicalRecordCreate')}
+              text="Adicionar prontuário"
+            />
+
+            <FlatList
+              data={record}
+              renderItem={renderItem}
+              keyExtractor={(record: Record) => record.id.toString()}
+            ></FlatList>
           </View>
         </ImageBackground>
       </TouchableWithoutFeedback>
-    </ScrollView>
+    
   )
 }
 
@@ -47,8 +97,20 @@ const styles = StyleSheet.create({
     marginVertical: 32,
     paddingHorizontal: 72
   },
+  card: {
+    width: '100%',
+    marginVertical: 10,
+    alignItems: 'center',
+    backgroundColor: "#033D54",
+    padding: 20,
+    borderRadius: 20,
+  },
   title: {
     marginTop: 20,
     fontSize: 20
   },
+  text: {
+    fontSize: 18,
+    color: "white"
+  }
 })
