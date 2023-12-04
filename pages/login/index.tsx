@@ -12,17 +12,21 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../../Types'
 import { FormProvider, useForm } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
 import FormInput from '../../components/FormInput'
 import Button from '../../components/Button'
+import { api } from '../../services/api'
+import { login } from '../../store/modules/auth'
 
 type FormData = {
   email: string
-  password: string
+  senha: string
 }
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>
 
 export default function Login({ navigation }: LoginScreenProps) {
+  const dispatch = useDispatch()
   const form = useForm<FormData>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -30,17 +34,18 @@ export default function Login({ navigation }: LoginScreenProps) {
   const EMAIL_REGEX =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: FormData) => {
+    console.log(data)
     setLoading(true)
     setError('')
-    /* api
-      .post('auth/login', data)
+    api
+      .post('/api/auth/login', data)
       .then(resp => {
         const { data } = resp
         dispatch(login(data))
       })
       .catch(() => setError('E-mail ou senha incorretos'))
-      .finally(() => setLoading(false)) */
+      .finally(() => setLoading(false))
   }
 
   return (
@@ -54,6 +59,7 @@ export default function Login({ navigation }: LoginScreenProps) {
         source={require('../../assets/background.png')}
       >
         <Image source={require('../../assets/logo.png')} />
+        <Text style={styles.title}>Login</Text>
         <View style={styles.inputContainer}>
           <FormProvider {...form}>
             <FormInput
@@ -71,7 +77,7 @@ export default function Login({ navigation }: LoginScreenProps) {
               }}
             />
             <FormInput
-              name="password"
+              name="senha"
               placeholder="********"
               secureTextEntry
               rules={{
@@ -119,6 +125,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 72
   },
   newAccount: {
+    backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: 'black',
     borderRadius: 20
@@ -127,6 +134,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     color: 'black'
+  },
+  title: {
+    marginTop: 20,
+    fontSize: 20
   },
   errorTxt: {
     color: 'red'

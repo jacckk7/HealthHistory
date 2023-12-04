@@ -19,7 +19,7 @@ export default function FormInput({ name, rules, children, ...inputProps }: Form
 
   return (
     <View style={styles.container}>
-      <View style={Platform.OS == "android" ? styles.input : styles.inputIos}>{children}</View>
+      <View style={styles.input}>{children}</View>
       <Input
         style={children ? { paddingLeft: 38 } : null}
         onBlur={onBlur}
@@ -37,18 +37,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  // Android
   input: {
     position: "absolute",
     zIndex: 2,
     left: 10,
     top: 16,
-  },
-  // Ios
-  inputIos: {
-    position: "absolute",
-    zIndex: 2,
-    left: 10,
-    top: 10,
   },
 });
