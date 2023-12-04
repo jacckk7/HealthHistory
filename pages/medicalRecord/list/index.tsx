@@ -54,6 +54,7 @@ export default function MedicalRecordList({
     >
       <View style={styles.card} key={item.id}>
         <Text style={styles.text}>{item.titulo}</Text>
+        <Text style={styles.text2}>{item.descricao}</Text>
       </View>
     </Pressable>
   )
@@ -111,6 +112,10 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
+    color: "white"
+  },
+  text2: {
+    fontSize: 14,
     color: "white"
   }
 })
