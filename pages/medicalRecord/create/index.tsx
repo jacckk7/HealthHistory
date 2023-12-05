@@ -66,7 +66,6 @@ export default function MedicalRecordCreate({
   }
 
   const onSubmit = async (data: FormData) => {
-    console.log(data)
     setLoading(true)
     setError('')
     try {
