@@ -1,8 +1,8 @@
+import * as React from 'react'
 import {
-  ImageBackground,
-  ScrollView,
-  TouchableWithoutFeedback,
+  Text,
   StyleSheet,
+  View
 } from 'react-native'
 import { RootStackParamList } from '../../../Types'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
@@ -10,26 +10,19 @@ import { useEffect, useState } from 'react'
 import { api } from '../../../services/api'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../store'
-import PDF from 'react-native-pdf';
+import PDF from 'react-native-pdf'
 
 type RecordShowScreenProps = NativeStackScreenProps<
   RootStackParamList,
   'RecordShow'
 >
 
-type Record = {
-  id: number
-  nome_arquivo: string
-  titulo: string
-  arquivo_pdf: string
-  descricao: string
-}
-
 export default function RecordShow({
   route,
   navigation
 }: RecordShowScreenProps) {
-  const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfData, setPdfData] = useState<Uint8Array | null>(null);
+  const [hexString, setHexString] = useState<string>('');
   const token = useSelector((store: RootState) => store.auth).access_token
 
   useEffect(() => {
@@ -38,25 +31,39 @@ export default function RecordShow({
     }
 
     api
-      .get(`api/documentos/recuperar/${route.params.id}/`, { headers })
+      .get(`api/documentos/recuperar/${route.params.id}/`, {
+        headers
+      })
       .then(resp => {
-        setPdfUrl(resp.data.pdfUrl)
+        const hexString = resp.request["_response"]
+        
+        setPdfData(hexToBytes(hexString))
+        console.log(pdfData)
       })
       .catch(error => {
         console.log(error)
       })
   }, [])
 
+  const hexToBytes = (hex: string): Uint8Array | null => {
+
+    const bytes = [];
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes.push(parseInt(hex.substr(i, 2), 16));
+    }
+    return new Uint8Array(bytes);
+  };
+
   return (
-    <ScrollView>
-      <TouchableWithoutFeedback>
-        <ImageBackground
-          style={styles.container}
-          source={require('../../../assets/background2.png')}
-        >
-        </ImageBackground>
-      </TouchableWithoutFeedback>
-    </ScrollView>
+        <View>
+          {/* {
+            pdfData ? (
+              <PDF source={{ uri: 'data:application/pdf;base64,' + pdfData.toString() }} />
+            ) : (
+              <Text>Carregando PDF ...</Text>
+            )
+          } */}
+        </View>
   )
 }
 

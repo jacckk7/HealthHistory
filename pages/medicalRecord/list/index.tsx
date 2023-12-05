@@ -34,6 +34,7 @@ export default function MedicalRecordList({
   navigation
 }: MedicalRecordListScreenProps) {
   const [record, setRecord] = useState<Record[]>()
+  const [refreshing, setRefreshing] = useState(true)
   const token = useSelector((store: RootState) => store.auth).access_token
 
   useEffect(() => {
@@ -44,8 +45,7 @@ export default function MedicalRecordList({
     api
       .get('/api/documentos/listar', { headers })
       .then(resp => setRecord(resp.data))
-
-    console.log(record)
+      .finally(() => setRefreshing(false))
   }, [])
 
   const renderItem = ({ item }: { item: Record }) => (
@@ -60,28 +60,37 @@ export default function MedicalRecordList({
   )
 
   return (
-    
-      <TouchableWithoutFeedback>
-        <ImageBackground
-          style={styles.container}
-          source={require('../../../assets/background2.png')}
-        >
-          <Text style={styles.title}>Lista de Prontuários</Text>
-          <View style={styles.inputContainer}>
-            <Button
-              onPress={() => navigation.navigate('MedicalRecordCreate')}
-              text="Adicionar prontuário"
-            />
+    <TouchableWithoutFeedback>
+      <ImageBackground
+        style={styles.container}
+        source={require('../../../assets/background2.png')}
+      >
+        <Text style={styles.title}>Lista de Prontuários</Text>
+        <View style={styles.inputContainer}>
+          <Button
+            onPress={() => navigation.navigate('MedicalRecordCreate')}
+            text="Adicionar prontuário"
+          />
 
-            <FlatList
-              data={record}
-              renderItem={renderItem}
-              keyExtractor={(record: Record) => record.id.toString()}
-            ></FlatList>
-          </View>
-        </ImageBackground>
-      </TouchableWithoutFeedback>
-    
+          <FlatList
+            data={record}
+            renderItem={renderItem}
+            keyExtractor={(record: Record) => record.id.toString()}
+            onRefresh={() => {
+              setRefreshing(true)
+              const headers = {
+                Authorization: `Bearer ${token}`
+              }
+              api
+                .get('/api/documentos/listar', { headers })
+                .then(resp => setRecord(resp.data))
+                .finally(() => setRefreshing(false))
+            }}
+            refreshing={refreshing}
+          ></FlatList>
+        </View>
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   )
 }
 
@@ -102,9 +111,9 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 10,
     alignItems: 'center',
-    backgroundColor: "#033D54",
+    backgroundColor: '#033D54',
     padding: 20,
-    borderRadius: 20,
+    borderRadius: 20
   },
   title: {
     marginTop: 20,
@@ -112,10 +121,10 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
-    color: "white"
+    color: 'white'
   },
   text2: {
     fontSize: 14,
-    color: "white"
+    color: 'white'
   }
 })
